@@ -1,15 +1,33 @@
 ﻿## Summary
 
 GHC 9.4.4 causes below error when compiling the code which depend on 
-both `file-embed` and `proteaaudio` on Windows, while GHC 8.10.7 does not.
+both `file-embed` and `proteaaudio` package on Windows, while GHC 8.10.7 does not.
 
 ~~~
 <no location info>: error:
     addDLL: stdc++ or dependencies not loaded. (Win32 error 126)
 ~~~
 
-Individually, these packages can be compliled and executed with no problem.
+Individually, these packages can be compiled and executed with no problem.
 Especially, generated sample executable for `proteaaudio` runs fine.
+
+However, when both `file-embed` and `proteaaudio` are added to build-depends field of .cabal file, below trivial code does not compile:
+
+~~~
+{-# LANGUAGE TemplateHaskell #-}
+module Main where
+
+import Data.FileEmbed
+import Data.ByteString (ByteString)
+
+main :: IO ()
+main = putStrLn "Hello World!"
+
+buffer :: ByteString -- not used
+buffer = $(embedFile "data/mm2_1401.wav")
+~~~
+
+If you comment out `buffer` or 
 
 ## Steps to reproduce
 
@@ -19,7 +37,7 @@ Especially, generated sample executable for `proteaaudio` runs fine.
 % stack build
 ~~~
 
-When compiling `proteaaudio` alone, the error will not occur.
+When the code depends only on `proteaaudio`, the error does not occur.
 Which can be checked by:
 
 ~~~
@@ -29,7 +47,7 @@ Which can be checked by:
 
 ## Expected behavior
 
-Compile succeed without error.
+Compilation succeed without error.
 
 ## Environment
 
